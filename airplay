@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 from typing import Any, Dict, List, Optional, Tuple
@@ -176,6 +177,22 @@ def is_airplay_pulse_name(sink: Dict[str, Any]) -> bool:
     if "airplay" in desc or "raop" in desc:
         return True
     return False
+
+
+def parse_raop_endpoint(node_name: str) -> Optional[Tuple[str, int]]:
+    # Expected format: raop_sink.<host>.local.<ip>.<port>
+    m = re.search(r"raop_sink\\..+\\.(\\d+\\.\\d+\\.\\d+\\.\\d+)\\.(\\d+)$", node_name)
+    if m:
+        return (m.group(1), int(m.group(2)))
+    return None
+
+
+def check_tcp(host: str, port: int, timeout: float = 1.5) -> bool:
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except Exception:
+        return False
 
 
 def find_sink(query: str, sinks: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -415,6 +432,33 @@ def cmd_diagnose() -> int:
     return 0
 
 
+def cmd_check() -> int:
+    backend = detect_backend()
+    sinks = get_airplay_sinks(backend)
+    if not sinks:
+        print("No AirPlay sinks found.")
+        return 1
+
+    print("AirPlay reachability (TCP/7000):")
+    any_ok = False
+    for s in sinks:
+        name = s["description"] or s["name"]
+        endpoint = parse_raop_endpoint(s["name"] or "")
+        if not endpoint:
+            print(f"  {s['id']}: {name} -> unknown endpoint")
+            continue
+        host, port = endpoint
+        ok = check_tcp(host, port)
+        any_ok = any_ok or ok
+        status = "ok" if ok else "blocked/unreachable"
+        print(f"  {s['id']}: {name} -> {host}:{port} [{status}]")
+
+    if not any_ok:
+        print("No reachable AirPlay endpoints. Device may be asleep, AirPlay 2-only, or blocked by network.")
+        return 2
+    return 0
+
+
 def cmd_connect(target: Optional[str]) -> int:
     backend = detect_backend()
     sinks = get_airplay_sinks(backend)
@@ -624,6 +668,7 @@ def main() -> int:
     sub.add_parser("ensure-raop", help="Load module-raop-discover via pactl")
     sub.add_parser("selftest", help="Run basic dependency and connectivity checks")
     sub.add_parser("diagnose", help="Print detailed diagnostics")
+    sub.add_parser("check", help="Check TCP reachability for AirPlay sinks")
 
     args = parser.parse_args()
 
@@ -645,6 +690,8 @@ def main() -> int:
             return cmd_selftest()
         if args.cmd == "diagnose":
             return cmd_diagnose()
+        if args.cmd == "check":
+            return cmd_check()
         parser.error("unknown command")
     except FileNotFoundError as e:
         print(f"Missing tool: {e}", file=sys.stderr)

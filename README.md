@@ -26,6 +26,7 @@ nix develop
 ./airplay ensure-raop
 ./airplay selftest
 ./airplay diagnose
+./airplay check
 ```
 
 ## Install (Nix)
