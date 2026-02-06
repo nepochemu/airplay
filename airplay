@@ -195,6 +195,16 @@ def check_tcp(host: str, port: int, timeout: float = 1.5) -> bool:
         return False
 
 
+def get_pw_node_name(node_id: int) -> Optional[str]:
+    if shutil.which("wpctl") is None:
+        return None
+    out = run(["wpctl", "inspect", str(node_id)], check=False)
+    m_name = re.search(r"node.name = \"([^\"]+)\"", out)
+    if m_name:
+        return m_name.group(1)
+    return None
+
+
 def find_sink(query: str, sinks: List[Dict[str, Any]]) -> Dict[str, Any]:
     if query.isdigit():
         qid = int(query)
@@ -444,6 +454,10 @@ def cmd_check() -> int:
     for s in sinks:
         name = s["description"] or s["name"]
         endpoint = parse_raop_endpoint(s["name"] or "")
+        if not endpoint and backend == "pipewire":
+            node_name = get_pw_node_name(int(s["id"]))
+            if node_name:
+                endpoint = parse_raop_endpoint(node_name)
         if not endpoint:
             print(f"  {s['id']}: {name} -> unknown endpoint")
             continue
