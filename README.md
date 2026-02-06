@@ -1,6 +1,7 @@
 # airplay-cli
 
-Route system audio to AirPlay (RAOP) devices on PipeWire or PulseAudio (NixOS/Linux).
+Provides a human‑friendly CLI to route AirPlay audio over Wi‑Fi to devices on PipeWire or PulseAudio. Existing tools
+  are too complex and unreliable for casual use, so this is a simpler, more stable alternative.
 
 ## Requirements
 
@@ -13,8 +14,6 @@ Route system audio to AirPlay (RAOP) devices on PipeWire or PulseAudio (NixOS/Li
 ## Usage
 
 ```bash
-cd ~/dev/airplay-cli
-nix develop
 ./airplay list
 ./airplay list --ensure
 ./airplay list --all
