@@ -29,8 +29,6 @@ Provides a human‑friendly CLI to route AirPlay audio over Wi‑Fi to devices o
 ./airplay install-autostart       # Install autoconnect user service
 ./airplay uninstall-autostart     # Remove autoconnect user service
 ./airplay reset                   # Restart audio services + reload RAOP
-./airplay install-watchdog        # Install watchdog timer (auto-reset)
-./airplay uninstall-watchdog      # Remove watchdog timer
 ```
 
 ## Nix Setup

@@ -14,7 +14,7 @@
         in {
           airplay = pkgs.stdenvNoCC.mkDerivation {
             pname = "airplay-cli";
-            version = "0.1.9";
+            version = "0.2.0";
             src = self;
             nativeBuildInputs = [ pkgs.makeWrapper ];
             dontBuild = true;
@@ -22,7 +22,7 @@
               mkdir -p $out/bin
               install -m755 $src/airplay $out/bin/airplay
               wrapProgram $out/bin/airplay \
-                --set AIRPLAY_VERSION ${"0.1.9"} \
+                --set AIRPLAY_VERSION ${"0.2.0"} \
                 --set AIRPLAY_REV ${self.rev or "dirty"} \
                 --prefix PATH : ${pkgs.python3}/bin \
                 --prefix PATH : ${pkgs.pipewire}/bin \
