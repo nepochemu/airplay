@@ -13,21 +13,21 @@ Provides a human‑friendly CLI to route AirPlay audio over Wi‑Fi to devices o
 ## Usage
 
 ```bash
-./airplay list
-./airplay list --ensure
-./airplay list --all
-./airplay connect "Living Room"
-./airplay connect 52
-./airplay connect
-./airplay status
-./airplay disconnect
-./airplay ensure-raop
-./airplay selftest
-./airplay diagnose
-./airplay check
-./airplay version
-./airplay install-autostart
-./airplay uninstall-autostart
+./airplay list                    # List AirPlay sinks
+./airplay list --ensure           # Load RAOP discovery then list
+./airplay list --all              # List AirPlay + non-AirPlay sinks
+./airplay connect "Living Room"   # Connect by name
+./airplay connect 52              # Connect by id
+./airplay connect                 # Connect saved default
+./airplay status                  # Show current default sink
+./airplay disconnect              # Switch back to non-AirPlay sink
+./airplay ensure-raop             # Load module-raop-discover
+./airplay selftest                # Check dependencies/connectivity
+./airplay diagnose                # Detailed diagnostics
+./airplay check                   # Test TCP reachability to sinks
+./airplay version                 # Show version and git rev
+./airplay install-autostart       # Install autoconnect user service
+./airplay uninstall-autostart     # Remove autoconnect user service
 ```
 
 ## Nix Setup
@@ -49,4 +49,3 @@ See `NIX_README.md` for Nix installation, Home Manager autostart, and NixOS setu
 - `ensure-raop` loads `module-raop-discover`, which exposes AirPlay devices as sinks.
 - `selftest` checks for required tools and basic PipeWire/WirePlumber connectivity.
 - `diagnose` prints detailed service and RAOP discovery info.
-
