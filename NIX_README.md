@@ -68,6 +68,8 @@ Example using a GitHub input (same style as ytm):
 ./airplay install-autostart
 ./airplay uninstall-autostart
 ./airplay reset
+./airplay install-watchdog
+./airplay uninstall-watchdog
 ```
 
 ## User Workflow Notes

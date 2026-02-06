@@ -679,6 +679,70 @@ def cmd_uninstall_autostart() -> int:
     return 0
 
 
+def cmd_install_watchdog() -> int:
+    unit_dir = os.path.join(
+        os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"),
+        "systemd",
+        "user",
+    )
+    os.makedirs(unit_dir, exist_ok=True)
+    service_path = os.path.join(unit_dir, "airplay-watchdog.service")
+    timer_path = os.path.join(unit_dir, "airplay-watchdog.timer")
+
+    service = """[Unit]
+Description=AirPlay watchdog
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '%h/.nix-profile/bin/airplay check || %h/.nix-profile/bin/airplay reset'
+"""
+    timer = """[Unit]
+Description=Run AirPlay watchdog periodically
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target
+"""
+    with open(service_path, "w", encoding="utf-8") as f:
+        f.write(service)
+    with open(timer_path, "w", encoding="utf-8") as f:
+        f.write(timer)
+
+    if shutil.which("systemctl") is not None:
+        run(["systemctl", "--user", "daemon-reload"], check=False)
+        run(["systemctl", "--user", "enable", "--now", "airplay-watchdog.timer"], check=False)
+
+    print(f"Installed watchdog unit: {service_path}")
+    print(f"Installed watchdog timer: {timer_path}")
+    return 0
+
+
+def cmd_uninstall_watchdog() -> int:
+    unit_dir = os.path.join(
+        os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"),
+        "systemd",
+        "user",
+    )
+    service_path = os.path.join(unit_dir, "airplay-watchdog.service")
+    timer_path = os.path.join(unit_dir, "airplay-watchdog.timer")
+
+    if shutil.which("systemctl") is not None:
+        run(["systemctl", "--user", "disable", "--now", "airplay-watchdog.timer"], check=False)
+        run(["systemctl", "--user", "daemon-reload"], check=False)
+
+    if os.path.exists(service_path):
+        os.remove(service_path)
+        print(f"Removed watchdog unit: {service_path}")
+    if os.path.exists(timer_path):
+        os.remove(timer_path)
+        print(f"Removed watchdog timer: {timer_path}")
+    return 0
+
+
 def cmd_reset() -> int:
     # Restart user audio services (best-effort), then reload RAOP discovery.
     if shutil.which("systemctl") is not None:
@@ -780,6 +844,8 @@ def main() -> int:
     sub.add_parser("version", help="Show version information")
     sub.add_parser("install-autostart", help="Install a user service to auto-connect on login")
     sub.add_parser("uninstall-autostart", help="Remove the auto-connect user service")
+    sub.add_parser("install-watchdog", help="Install a watchdog timer to auto-reset if needed")
+    sub.add_parser("uninstall-watchdog", help="Remove the watchdog timer")
     sub.add_parser("reset", help="Restart audio services and reload RAOP discovery")
     sub.add_parser("ensure-raop", help="Load module-raop-discover via pactl")
     sub.add_parser("selftest", help="Run basic dependency and connectivity checks")
@@ -806,6 +872,10 @@ def main() -> int:
             return cmd_install_autostart()
         if args.cmd == "uninstall-autostart":
             return cmd_uninstall_autostart()
+        if args.cmd == "install-watchdog":
+            return cmd_install_watchdog()
+        if args.cmd == "uninstall-watchdog":
+            return cmd_uninstall_watchdog()
         if args.cmd == "reset":
             return cmd_reset()
         if args.cmd == "ensure-raop":
