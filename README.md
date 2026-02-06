@@ -102,6 +102,7 @@ airplay list
 ## Notes
 
 - `connect` sets the default sink via `wpctl`. Existing streams move automatically only if `pactl` is available.
+- Saved default now follows the sink name (stable) instead of numeric id.
 - `ensure-raop` loads `module-raop-discover`, which exposes AirPlay devices as sinks.
 - `selftest` checks for required tools and basic PipeWire/WirePlumber connectivity.
 - `diagnose` prints detailed service and RAOP discovery info.
@@ -161,5 +162,4 @@ systemctl --user status airplay-autoconnect.service
   airplay list --ensure
   ```
 - If a receiver is AirPlay 2 only, Linux RAOP (AirPlay 1) may not work even if it appears in the list.
-
 

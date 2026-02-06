@@ -234,6 +234,11 @@ def find_sink(query: str, sinks: List[Dict[str, Any]]) -> Dict[str, Any]:
     return matches[0]
 
 
+def sink_key(sink: Dict[str, Any]) -> str:
+    # Prefer stable node name if present, else description/name.
+    return sink.get("name") or sink.get("description") or ""
+
+
 def parse_wpctl_default_sink_id() -> Optional[int]:
     if shutil.which("wpctl") is None:
         return None
@@ -493,21 +498,26 @@ def cmd_connect(target: Optional[str]) -> int:
 
     if target is None:
         cfg = load_config()
-        saved = cfg.get("default_sink")
+        saved_key = cfg.get("default_sink_key")
+        saved_id = cfg.get("default_sink")
         saved_backend = cfg.get("default_sink_backend")
-        if not saved:
+        if saved_backend and saved_backend != backend:
+            raise RuntimeError(
+                f"Saved default is for backend '{saved_backend}', but current backend is '{backend}'"
+            )
+        if saved_key:
+            match = next((s for s in sinks if sink_key(s) == saved_key), None)
+            if match:
+                target = str(match["id"])
+        if target is None and saved_id:
+            target = str(saved_id)
+        if target is None:
             current = get_current_default_sink(backend)
             if current and (is_airplay_sink(current["props"]) or is_airplay_pulse_name(current)):
                 target = str(current["id"])
             else:
                 # Lowest id if no saved default
                 target = str(sorted(sinks, key=lambda s: int(s["id"]))[0]["id"])
-        if saved_backend and saved_backend != backend:
-            raise RuntimeError(
-                f"Saved default is for backend '{saved_backend}', but current backend is '{backend}'"
-            )
-        if target is None:
-            target = str(saved)
 
     sink = find_sink(target, sinks)
 
@@ -516,6 +526,7 @@ def cmd_connect(target: Optional[str]) -> int:
 
     cfg = load_config()
     cfg["default_sink"] = sink["id"]
+    cfg["default_sink_key"] = sink_key(sink)
     cfg["default_sink_name"] = sink["description"] or sink["name"]
     cfg["default_sink_backend"] = backend
     save_config(cfg)
