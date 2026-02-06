@@ -459,12 +459,12 @@ def cmd_check() -> int:
     for s in sinks:
         name = s["description"] or s["name"]
         endpoint = parse_raop_endpoint(s["name"] or "")
+        node_name = s["name"] or ""
         if not endpoint and backend == "pipewire":
-            node_name = get_pw_node_name(int(s["id"]))
-            if node_name:
-                endpoint = parse_raop_endpoint(node_name)
+            node_name = get_pw_node_name(int(s["id"])) or node_name
+            endpoint = parse_raop_endpoint(node_name)
         if not endpoint:
-            print(f"  {s['id']}: {name} -> unknown endpoint")
+            print(f"  {s['id']}: {name} -> unknown endpoint (node.name: {node_name})")
             continue
         host, port = endpoint
         ok = check_tcp(host, port)
