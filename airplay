@@ -606,6 +606,13 @@ def cmd_status() -> int:
     return 0
 
 
+def cmd_version() -> int:
+    ver = os.environ.get("AIRPLAY_VERSION", "unknown")
+    rev = os.environ.get("AIRPLAY_REV", "unknown")
+    print(f"airplay {ver} ({rev})")
+    return 0
+
+
 def cmd_ensure_raop() -> int:
     if shutil.which("pactl") is None:
         raise RuntimeError("pactl is required to load module-raop-discover")
@@ -691,6 +698,7 @@ def main() -> int:
 
     sub.add_parser("disconnect", help="Switch default sink back to a non-AirPlay device")
     sub.add_parser("status", help="Show current default sink")
+    sub.add_parser("version", help="Show version information")
     sub.add_parser("ensure-raop", help="Load module-raop-discover via pactl")
     sub.add_parser("selftest", help="Run basic dependency and connectivity checks")
     sub.add_parser("diagnose", help="Print detailed diagnostics")
@@ -710,6 +718,8 @@ def main() -> int:
             return cmd_disconnect()
         if args.cmd == "status":
             return cmd_status()
+        if args.cmd == "version":
+            return cmd_version()
         if args.cmd == "ensure-raop":
             return cmd_ensure_raop()
         if args.cmd == "selftest":
