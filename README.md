@@ -28,6 +28,7 @@ Provides a human‑friendly CLI to route AirPlay audio over Wi‑Fi to devices o
 ./airplay version                 # Show version and git rev
 ./airplay install-autostart       # Install autoconnect user service
 ./airplay uninstall-autostart     # Remove autoconnect user service
+./airplay reset                   # Restart audio services + reload RAOP
 ```
 
 ## Nix Setup

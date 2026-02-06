@@ -51,7 +51,8 @@ Example using a GitHub input (same style as ytm):
           };
           Service = {
             Type = "oneshot";
-            ExecStart = "${airplay.packages.${system}.airplay}/bin/airplay connect";
+            ExecStart = "${airplay.packages.${system}.airplay}/bin/airplay reset";
+            ExecStartPost = "${airplay.packages.${system}.airplay}/bin/airplay connect";
           };
           Install = { WantedBy = [ "default.target" ]; };
         };
@@ -66,6 +67,7 @@ Example using a GitHub input (same style as ytm):
 ```bash
 ./airplay install-autostart
 ./airplay uninstall-autostart
+./airplay reset
 ```
 
 ## User Workflow Notes
@@ -103,4 +105,3 @@ Notes:
   airplay list --ensure
   ```
 - If a receiver is AirPlay 2 only, Linux RAOP (AirPlay 1) may not work even if it appears in the list.
-
