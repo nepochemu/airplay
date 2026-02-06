@@ -481,6 +481,13 @@ def cmd_check() -> int:
 def cmd_connect(target: Optional[str]) -> int:
     backend = detect_backend()
     sinks = get_airplay_sinks(backend)
+    if not sinks and shutil.which("pactl") is not None:
+        # Best-effort: load RAOP discovery and retry once.
+        try:
+            cmd_ensure_raop()
+        except Exception:
+            pass
+        sinks = get_airplay_sinks(backend)
     if not sinks:
         raise RuntimeError("No AirPlay sinks found")
 
