@@ -183,10 +183,10 @@ def parse_raop_endpoint(node_name: str) -> Optional[Tuple[str, int]]:
     # Common formats:
     # raop_sink.<host>.local.<ip>.<port>
     # raop_sink.<host>.<ip>.<port>
-    m = re.search(r"(\\d+\\.\\d+\\.\\d+\\.\\d+)\\.(\\d+)$", node_name)
+    m = re.search(r"(\d+\.\d+\.\d+\.\d+)\.(\d+)$", node_name)
     if m:
         return (m.group(1), int(m.group(2)))
-    m = re.search(r"(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)", node_name)
+    m = re.search(r"(\d+\.\d+\.\d+\.\d+):(\d+)", node_name)
     if m:
         return (m.group(1), int(m.group(2)))
     return None
