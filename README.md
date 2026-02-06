@@ -46,6 +46,40 @@ To remove it:
 ./airplay uninstall-autostart
 ```
 
+## Home Manager (declarative autostart)
+
+Example using a local checkout so it keeps working even if GitHub is unavailable:
+
+```nix
+{
+  inputs.airplay.url = "path:/home/airflower/dev/airplay-cli";
+
+  outputs = { self, nixpkgs, home-manager, airplay, ... }:
+  let
+    system = "x86_64-linux";
+  in {
+    homeConfigurations.airflower = home-manager.lib.homeManagerConfiguration {
+      pkgs = import nixpkgs { inherit system; };
+      modules = [{
+        home.packages = [ airplay.packages.${system}.airplay ];
+        systemd.user.services.airplay-autoconnect = {
+          Unit = {
+            Description = "AirPlay autoconnect";
+            After = [ "pipewire.service" "pipewire-pulse.service" "wireplumber.service" ];
+            Wants = [ "pipewire.service" "pipewire-pulse.service" "wireplumber.service" ];
+          };
+          Service = {
+            Type = "oneshot";
+            ExecStart = "${airplay.packages.${system}.airplay}/bin/airplay connect";
+          };
+          Install = { WantedBy = [ "default.target" ]; };
+        };
+      }];
+    };
+  };
+}
+```
+
 ## Install (Nix)
 
 ```bash
