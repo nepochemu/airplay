@@ -14,7 +14,7 @@
         in {
           airplay = pkgs.stdenvNoCC.mkDerivation {
             pname = "airplay-cli";
-            version = "0.1.2";
+            version = "0.1.3";
             src = self;
             nativeBuildInputs = [ pkgs.makeWrapper ];
             dontBuild = true;
