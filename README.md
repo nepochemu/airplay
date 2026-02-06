@@ -1,0 +1,69 @@
+# airplay-cli
+
+Route system audio to AirPlay (RAOP) devices on PipeWire or PulseAudio (NixOS/Linux).
+
+## Requirements
+
+- PipeWire: `pipewire` (for `pw-dump`) and `wireplumber` (for `wpctl`)
+- PulseAudio: `pulseaudio` (for `pactl`)
+- `pulseaudio` is also used on PipeWire to move existing streams and load RAOP discovery
+- Avahi running (`services.avahi.enable = true;`) so RAOP devices are discoverable
+- PipeWire’s PulseAudio server enabled (`services.pipewire.pulse.enable = true;`) if using PipeWire
+
+## Usage
+
+```bash
+cd ~/dev/airplay-cli
+nix develop
+./airplay list
+./airplay list --ensure
+./airplay list --all
+./airplay connect "Living Room"
+./airplay connect 52
+./airplay connect
+./airplay status
+./airplay disconnect
+./airplay ensure-raop
+./airplay selftest
+./airplay diagnose
+```
+
+## Install (Nix)
+
+```bash
+# Run without installing
+nix run .#airplay -- list
+
+# Install into your profile
+nix profile install .#airplay
+airplay list
+```
+
+## Help
+
+```bash
+./airplay --help
+./airplay list --help
+./airplay connect --help
+```
+
+## Notes
+
+- `connect` sets the default sink via `wpctl`. Existing streams move automatically only if `pactl` is available.
+- `ensure-raop` loads `module-raop-discover`, which exposes AirPlay devices as sinks.
+- `selftest` checks for required tools and basic PipeWire/WirePlumber connectivity.
+- `diagnose` prints detailed service and RAOP discovery info.
+
+## NixOS quick setup (example)
+
+```nix
+{ services.pipewire = {
+    enable = true;
+    pulse.enable = true;
+  };
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+  };
+}
+```
