@@ -180,8 +180,13 @@ def is_airplay_pulse_name(sink: Dict[str, Any]) -> bool:
 
 
 def parse_raop_endpoint(node_name: str) -> Optional[Tuple[str, int]]:
-    # Expected format: raop_sink.<host>.local.<ip>.<port>
-    m = re.search(r"raop_sink\\..+\\.(\\d+\\.\\d+\\.\\d+\\.\\d+)\\.(\\d+)$", node_name)
+    # Common formats:
+    # raop_sink.<host>.local.<ip>.<port>
+    # raop_sink.<host>.<ip>.<port>
+    m = re.search(r"(\\d+\\.\\d+\\.\\d+\\.\\d+)\\.(\\d+)$", node_name)
+    if m:
+        return (m.group(1), int(m.group(2)))
+    m = re.search(r"(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)", node_name)
     if m:
         return (m.group(1), int(m.group(2)))
     return None
