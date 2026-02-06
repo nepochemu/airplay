@@ -28,6 +28,22 @@ nix develop
 ./airplay diagnose
 ./airplay check
 ./airplay version
+./airplay install-autostart
+./airplay uninstall-autostart
+```
+
+## Autostart
+
+To auto-connect to your saved default on login:
+
+```bash
+./airplay install-autostart
+```
+
+To remove it:
+
+```bash
+./airplay uninstall-autostart
 ```
 
 ## Install (Nix)
